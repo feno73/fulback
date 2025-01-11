@@ -4,8 +4,9 @@ import { Cancha } from './cancha/cancha.entity';
 import { Usuario } from './usuario/usuario.entity';
 import { Reserva } from './reserva/reserva.entity';
 import { UsuarioModule } from './usuario/usuario.module';
-import {CanchaModule} from "./cancha/cancha.module";
+import { CanchaModule } from './cancha/cancha.module';
 import { ReservaModule } from './reserva/reserva.module';
+import { DisponibilidadModule } from './reserva/disponibilidad.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ReservaModule } from './reserva/reserva.module';
     CanchaModule,
     UsuarioModule,
     ReservaModule,
+    DisponibilidadModule,
   ],
   controllers: [],
   providers: [],
