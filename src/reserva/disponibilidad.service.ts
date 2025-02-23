@@ -13,19 +13,20 @@ export class DisponibilidadService {
 
   async getDisponibilidad(startDateStr: string): Promise<any> {
     const startDate = new Date(`${startDateStr}T00:00:00`);
+    console.log('startDateStr', startDateStr);
+    console.log('startDate', startDate);
     if (isNaN(startDate.getTime())) {
       throw new Error('La fecha no es válida');
     }
 
-    const endDate = addDays(startDate, 7);
+    //    const endDate = addDays(startDate, 7);
 
     // Obtenemos todas las reservas con sus relaciones
     const reservasEnRango = await this.reservaRepository.find({
       where: {
-        fecha: Between(startOfDay(startDate), endOfDay(endDate)),
+        fecha: Between(startOfDay(startDate), endOfDay(startDate)),
       },
     });
-
     const formatoFecha = 'yyyy-MM-dd';
     const formatoHora = 'HH:mm';
 
@@ -49,9 +50,24 @@ export class DisponibilidadService {
         // Construimos "09:00", "10:00", ...
         const horaStr = hora.toString().padStart(2, '0') + ':00';
 
-        // Chequeamos en el Set
         const clave = `${diaStr}_${horaStr}`;
-        const estaOcupado = reservasSet.has(clave);
+        let estaOcupado: boolean;
+
+        const now = new Date();
+        // Obtenemos el inicio del día de hoy (00:00)
+        const todayStart = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+        );
+
+        if (currentDate < todayStart) {
+          // Si currentDate es un día anterior a hoy, se marca como ocupado
+          estaOcupado = true;
+        } else {
+          // Si es hoy o un día futuro, se valida contra el Set
+          estaOcupado = reservasSet.has(clave);
+        }
 
         result.push({
           day: diaStr,
