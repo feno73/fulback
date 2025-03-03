@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Reserva } from '../reserva/reserva.entity';
 import { addDays, format, startOfDay, endOfDay } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 @Injectable()
 export class DisponibilidadService {
@@ -13,8 +14,6 @@ export class DisponibilidadService {
 
   async getDisponibilidad(startDateStr: string): Promise<any> {
     const startDate = new Date(`${startDateStr}T00:00:00`);
-    console.log('startDateStr', startDateStr);
-    console.log('startDate', startDate);
     if (isNaN(startDate.getTime())) {
       throw new Error('La fecha no es válida');
     }
@@ -30,13 +29,20 @@ export class DisponibilidadService {
     const formatoFecha = 'yyyy-MM-dd';
     const formatoHora = 'HH:mm';
 
+    console.log('Reservas en rango:', reservasEnRango);
     const reservasSet = new Set<string>();
 
     for (const reserva of reservasEnRango) {
-      const diaStr = format(reserva.fecha, formatoFecha); // "2025-01-13"
-      const horaStr = format(reserva.fecha, formatoHora); // "09:00"
+      const fechaLocal = new Date(reserva.fecha);
+      console.log('Fecha local:', fechaLocal, 'Fecha:', reserva.fecha);
+      const diaStr = formatInTimeZone(fechaLocal, 'UTC', formatoFecha); // "2025-01-13"
+      const horaStr = formatInTimeZone(fechaLocal, 'UTC', formatoHora); // "09:00"
+
+      console.log('Dia y hora:', diaStr, horaStr);
       reservasSet.add(`${diaStr}_${horaStr}`);
     }
+
+    console.log('Set de reservas:', reservasSet);
 
     // 5. Generar los slots para cada día + hora, y verificar disponibilidad
     const result: any[] = [];
